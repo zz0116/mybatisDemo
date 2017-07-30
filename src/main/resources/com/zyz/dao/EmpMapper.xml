@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zyz.dao.EmpDao">
+    <resultMap id="empResultMap" type="com.zyz.model.Emp">
+        <id property="id" column="emp_id"/>
+        <result property="name" column="emp_name"/>
+        <result property="sal" column="emp_sal"/>
+    </resultMap>
+
+    <select id="selectEmp_by_id" parameterType="int" resultMap="empResultMap">
+        select emp_id, emp_name, emp_sal from emp where emp_id = #{id}
+    </select>
+
+
+    <update id="updateEmp" statementType="PREPARED" parameterType="Emp">
+        update emp set emp_name = #{name}, emp_sal = #{sal} where emp_id = #{id}
+    </update>
+    <delete id="deleteEmp" statementType="PREPARED" parameterType="Emp">
+        delete from emp where emp_id = #{id}
+    </delete>
+    <insert id="insertEmp" statementType="PREPARED" parameterType="Emp">
+        insert into emp(emp_id, emp_name, emp_sal) values(#{id}, #{name}, #{sal})
+    </insert>
+
+
+    <insert id="dynaInsert" parameterType="Emp">
+        INSERT INTO emp(<include refid="key"/> ) VALUES(<include refid="value"/> )
+    </insert>
+    <sql id="key">
+        <trim suffixOverrides=",">
+            <if test="id!=null">
+                emp_id,
+            </if>
+            <if test="name!=null">
+                emp_name,
+            </if>
+            <if test="sal!=null">
+                emp_sal,
+            </if>
+        </trim>
+    </sql>
+    <sql id="value">
+        <trim suffixOverrides=",">
+            <if test="id!=null">
+                #{id},
+            </if>
+            <if test="name!=null">
+                #{name},
+            </if>
+            <if test="sal!=null">
+                #{sal},
+            </if>
+        </trim>
+    </sql>
+
+
+    <delete id="dynaDelete">
+        DELETE FROM emp WHERE emp_id IN
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <update id="dynaUpdate" parameterType="Emp">
+        UPDATE emp
+        <set>
+            <if test="name!=null">
+                emp_name=#{name},
+            </if>
+            <if test="sal!=null">
+                emp_sal=#{sal},
+            </if>
+        </set>
+        WHERE emp_id=#{id}
+    </update>
+
+
+    <select id="dynaQuery" parameterType="list" resultMap="empResultMap">
+        select emp_id, emp_name, emp_sal from emp where emp_id IN
+        <foreach collection="list" open="(" close=")" separator="," item="item">
+            #{item}
+        </foreach>
+    </select>
+</mapper>
